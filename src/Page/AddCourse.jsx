@@ -1,45 +1,78 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import Swal from 'sweetalert2'
 
 const AddCourse = () => {
 
-    const handleAddCourse = async(e) => {
+    const [courseType, setCourseType] = useState('free')
+    const [isPremium, setIsPremium] = useState(false)
+
+    const handleCourseType = (e) => {
+        setCourseType(e.target.value)
+    }
+
+    useEffect(() => {
+        if (courseType.toLowerCase() === 'free') {
+            setIsPremium(false)
+        } else if (courseType.toLowerCase() === 'premium') {
+            setIsPremium(true)
+        }
+    }, [courseType, setCourseType])
+
+
+    const handleAddCourse = async (e) => {
         e.preventDefault()
 
         const form = e.target
         const title = form.title.value
         const thumbnailUrl = form.thumbnailUrl.value
         const description = form.description.value
-        const price = form.price.value
+        let price
+        if (courseType === 'free') {
+            price = 0
+        } else {
+            price = form.price.value
+        }
         const category = form.category.value
 
-        const newCourse = {
-            title,
-            thumbnailUrl,
-            description,
-            price,
-            category
+        if (!title || !description || !category || (price === '' || price === undefined)) {
+            Swal.fire({
+                position: "center",
+                icon: "error",
+                title: "Please Fill Out The required Fields",
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } else {
+
+            const newCourse = {
+                title,
+                thumbnailUrl,
+                description,
+                price,
+                category
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/courses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newCourse),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    form.reset(); // Clear the form after successful submission
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
         }
 
-        try {
-            const response = await fetch('http://localhost:5000/courses', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(newCourse),
-            });
-        
-            const result = await response.json();
-            if (response.ok) {
-              alert(result.message);
-              form.reset(); // Clear the form after successful submission
-            } else {
-              alert('Error: ' + result.message);
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to add course');
-          }
     }
 
     return (
@@ -57,9 +90,19 @@ const AddCourse = () => {
                     <div className="input-group mb-4">
                         <textarea name='description' type="text" placeholder="Course Description" className="textarea input-bordered w-full" />
                     </div>
+
                     <div className="input-group mb-4">
-                        <input name='price' type="number" placeholder="Course price" className="input input-bordered w-full" />
+                        <label className='label font-bold'>Course Type</label>
+                        <select onChange={(e) => handleCourseType(e)} name="select" className='select select-bordered w-full'>
+                            <option value="free">Free</option>
+                            <option value="premium">Premium</option>
+                        </select>
                     </div>
+
+                    {isPremium && <div className="input-group mb-4">
+                        <input name='price' type="number" placeholder="Course price" className="input input-bordered w-full" />
+                    </div>}
+
                     <div className="input-group mb-4">
                         <input name='category' type="text" placeholder="Course Category" className="input input-bordered w-full" />
                     </div>
