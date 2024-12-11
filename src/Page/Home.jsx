@@ -1,9 +1,18 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { authContext } from '../Context/AuthContex/AuthContext'
+import Course from '../components/Course/Course'
 
 const Home = () => {
+
+  const { allCourses } = useContext(authContext)
+
   return (
-    <div>
-      <h1>home page</h1>
+    <div className='py-20'>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {allCourses.map((item, index) => {
+          return <Course key={index} course={item} />
+        })}
+      </div>
     </div>
   )
 }

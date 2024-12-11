@@ -104,7 +104,7 @@ const AddCourse = () => {
                     </div>}
 
                     <div className="input-group mb-4">
-                        <input name='category' type="text" placeholder="Course Category" className="input input-bordered w-full" />
+                        <input name='category' type="text" placeholder="Dept." className="input input-bordered w-full" />
                     </div>
 
                     <div className="input-group mt-10">
